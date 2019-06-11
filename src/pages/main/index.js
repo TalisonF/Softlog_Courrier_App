@@ -23,7 +23,6 @@ export default class Main extends Component {
     return(
       <Container>
         <Map/>
-        
       </Container>
       ); 
   }

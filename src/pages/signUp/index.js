@@ -43,11 +43,12 @@ export default class SignUp extends Component {
     document : '',
     email: '',
     password: '',
+    confirmPassword: false,
     phone: '',
     zip: '',
     address: '',
     number: '',
-    complement: 'NA',
+    complement: '',
     district: '',
     city: '',
     state: '',
@@ -69,6 +70,7 @@ export default class SignUp extends Component {
             city: dados.data.address.city,
             state: dados.data.address.state,
             district: dados.data.address.district,
+            error: ''
         }); 
         if(dados.data.address.complement !== ''){
           this.setState({ complement : dados.data.address.complement});  
@@ -81,12 +83,32 @@ export default class SignUp extends Component {
     }
   };
 
+  handleConfirmPassword = (passwordConfirm) => {
+    if(passwordConfirm === this.state.password){
+      this.setState({confirmPassword: true});
+      this.setState({success: 'Senhas conferem!', error: ''});
+    }else{
+      this.setState({error: 'Senhas não conferem', success: ''})
+    }
+  }
+
+  handleChangePassword = (password) => {
+    this.setState({password});
+    if(password.length >= 6){
+      this.setState({password, error: ''})
+    }else{
+      this.setState({error: 'Senha precisa de no minimo 6 caracteres!'})
+    }
+  }
+
   handleSignUpPress = async () => {
-    if (this.state.email.length === 0 || this.state.password.length === 0) {
-      this.setState({ error: 'Preencha todos os campos para continuar!' }, () => false);
+    if (this.state.email.length === 0 || this.state.password.length >= 6) {
+      this.setState({ error: 'Preencha todos os campos para continuar!' });
+    } else if (!this.state.confirmPassword) {
+      this.setState({ error: 'Senhas não conferem!' }, () => false);
     } else {
       try {
-        let dados = await api.post('api/v1/courier', {
+        await api.post('api/v1/courier', {
           first_name: this.state.username,
           last_name: this.state.last_name,
           document: this.state.document,
@@ -224,7 +246,14 @@ export default class SignUp extends Component {
         <Input
           placeholder="Senha"
           value={this.state.password}
-          onChangeText={(password) => this.setState({password})}
+          onChangeText={this.handleChangePassword}
+          autoCapitalize="none"
+          autoCorrect={false}
+          secureTextEntry
+        />
+        <Input
+          placeholder="Confirmar Senha"
+          onChangeText={this.handleConfirmPassword}
           autoCapitalize="none"
           autoCorrect={false}
           secureTextEntry
